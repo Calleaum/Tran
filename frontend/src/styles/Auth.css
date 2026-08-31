@@ -1,0 +1,162 @@
+/* ==========================================================================
+   ÉCRAN LOGIN / REGISTER — même thème "table feutrée" cartoon que le reste
+   de l'appli (voir App.css pour les variables --felt, --brass, --toon-*).
+   ========================================================================== */
+
+.auth-screen {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+  background: radial-gradient(ellipse at 50% -10%, rgba(217, 180, 92, 0.14), transparent 55%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem 2.25rem 2.25rem;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.2));
+  border: var(--toon-line) solid var(--toon-line-color);
+  border-radius: 22px;
+  box-shadow: var(--toon-shadow);
+  color: var(--cream-100);
+}
+
+.auth-card__suits {
+  display: block;
+  text-align: center;
+  letter-spacing: 0.4em;
+  font-size: 1rem;
+  color: var(--brass-400);
+  margin-bottom: 0.85rem;
+}
+
+.auth-card__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.9rem;
+  text-align: center;
+  margin: 0 0 0.4rem 0;
+  color: var(--cream-100);
+}
+
+.auth-card__subtitle {
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--cream-200);
+  opacity: 0.8;
+  margin: 0 0 1.75rem 0;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.auth-field label {
+  font-size: 0.8rem;
+  color: var(--cream-200);
+  letter-spacing: 0.02em;
+}
+
+.auth-input {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 2px solid rgba(217, 180, 92, 0.35);
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--cream-100);
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.auth-input::placeholder {
+  color: var(--cream-200);
+  opacity: 0.55;
+}
+.auth-input:focus {
+  outline: none;
+  border-color: var(--brass-400);
+  box-shadow: 0 0 0 3px rgba(217, 180, 92, 0.22);
+}
+
+.auth-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  border: 2px solid rgba(168, 40, 59, 0.5);
+  background: rgba(168, 40, 59, 0.16);
+  color: #f0c9c9;
+  font-size: 0.85rem;
+}
+
+.auth-submit {
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.9rem;
+  border-radius: 12px;
+  border: var(--toon-line) solid var(--toon-line-color);
+  background: linear-gradient(160deg, var(--brass-300), var(--brass-600));
+  color: var(--ink-900);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: var(--toon-shadow-sm);
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.12s ease, filter 0.12s ease;
+}
+.auth-submit:hover:not(:disabled) {
+  transform: translate(-2px, -3px) scale(1.02);
+  box-shadow: 6px 7px 0 rgba(0, 0, 0, 0.38);
+  filter: brightness(1.06);
+}
+.auth-submit:active:not(:disabled) {
+  transform: translate(0, 0) scale(0.98);
+  box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.35);
+}
+.auth-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.auth-switch {
+  text-align: center;
+  margin: 1.6rem 0 0 0;
+  font-size: 0.88rem;
+  color: var(--cream-200);
+}
+
+.auth-switch__link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--brass-400);
+  font-weight: 700;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.auth-switch__link:hover {
+  color: var(--brass-300);
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 2rem 1.5rem 1.75rem;
+  }
+}
