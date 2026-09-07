@@ -6,12 +6,14 @@
 import { io, Socket } from 'socket.io-client';
 import { TOKEN_KEY } from './api';
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
+// Même logique que pour API_URL (voir services/api.ts) : par défaut, on se
+// connecte sur l'origine courante du navigateur plutôt qu'une IP figée.
+const WS_URL = import.meta.env.VITE_WS_URL || window.location.origin;
 
 let gameSocket: Socket | null = null;
 let chatSocket: Socket | null = null;
 
-const authPayload = () => ({ token: localStorage.getItem(TOKEN_KEY) });
+const authPayload = () => ({ token: sessionStorage.getItem(TOKEN_KEY) });
 
 export function getGameSocket(): Socket {
   if (!gameSocket) {

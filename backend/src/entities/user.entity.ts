@@ -17,17 +17,39 @@ export class User {
   @Column()
   username!: string;
 
-  @Column()
-  password!: string;
+  // Nullable : un compte créé via OAuth 42 n'a pas de mot de passe local.
+  @Column({ nullable: true })
+  password?: string;
 
   @Column({ nullable: true })
   avatar?: string;
+
+  // Identifiant unique de l'utilisateur sur l'API 42 (login OAuth).
+  // Nullable : uniquement présent pour les comptes créés/liés via 42.
+  @Column({ unique: true, nullable: true })
+  fortyTwoId?: string;
 
   @Column({ default: 0 })
   wins!: number;
 
   @Column({ default: 0 })
   losses!: number;
+
+  // ─── Titres "Président" ──────────────────────────────────────────────
+  // Nombre de manches terminées (dans n'importe quelle partie) où ce
+  // joueur a porté chaque titre. Mis à jour manche par manche, en même
+  // temps que wins/losses (voir PresidentService.updateStats) — PAS
+  // seulement quand la partie entière est terminée, sinon ces compteurs
+  // resteraient à 0 dans la quasi-totalité des parties (personne ne clique
+  // jamais sur "Terminer la partie").
+  @Column({ default: 0 })
+  presidentCount!: number;
+
+  @Column({ default: 0 })
+  neutralCount!: number;
+
+  @Column({ default: 0 })
+  trouducCount!: number;
 
   // ─── Système d'XP ────────────────────────────────────────────────────
   // XP cumulé sur toute la vie du compte. Un palier = 1000 XP

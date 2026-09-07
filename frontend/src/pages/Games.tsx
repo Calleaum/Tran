@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { PlayMenu } from '../lobby/PlayMenu';
 import { GameTable } from '../game/GameTable';
+import { ACTIVE_ROOM_KEY } from '../services/api';
 
 interface GamesPageProps {
   onBack: () => void;
@@ -12,8 +13,46 @@ interface ActiveRoom {
   spectate: boolean;
 }
 
+// Persisté en sessionStorage (comme le JWT, voir services/socket.ts) pour
+// survivre à un F5 : sans ça, un rechargement de page perdait cet état
+// React et renvoyait l'utilisateur au menu "Jouer" alors même que le
+// gateway (voir game.gateway.ts, délai de grâce sur la déconnexion) le
+// gardait bien inscrit dans la partie côté serveur. Scope par onglet, donc
+// pas de fuite d'un salon vers un autre onglet — mais PAS entre deux
+// comptes utilisés successivement dans le même onglet : c'est
+// authService (login/register/logout) qui est responsable de vider cette
+// clé à chaque changement de session, voir services/authService.ts.
+
+function readStoredRoom(): ActiveRoom | null {
+  try {
+    const raw = sessionStorage.getItem(ACTIVE_ROOM_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (typeof parsed?.gameId === 'string') {
+      return { gameId: parsed.gameId, spectate: Boolean(parsed.spectate) };
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
 export function GamesPage({ onBack, onRoomStateChange }: GamesPageProps) {
-  const [activeRoom, setActiveRoom] = useState<ActiveRoom | null>(null);
+  const [activeRoom, setActiveRoomState] = useState<ActiveRoom | null>(readStoredRoom);
+  // Message affiché sur le menu "Jouer" quand on en revient suite à un
+  // échec (ex : salon restauré depuis une session précédente qui n'existe
+  // plus) plutôt qu'un départ volontaire.
+  const [roomError, setRoomError] = useState<string | null>(null);
+
+  const setActiveRoom = (room: ActiveRoom | null) => {
+    setActiveRoomState(room);
+    try {
+      if (room) sessionStorage.setItem(ACTIVE_ROOM_KEY, JSON.stringify(room));
+      else sessionStorage.removeItem(ACTIVE_ROOM_KEY);
+    } catch {
+      // ignore (mode privé strict, quota, etc.)
+    }
+  };
 
   useEffect(() => {
     onRoomStateChange?.(Boolean(activeRoom));
@@ -25,7 +64,10 @@ export function GamesPage({ onBack, onRoomStateChange }: GamesPageProps) {
         gameId={activeRoom.gameId}
         roomLabel={activeRoom.gameId.slice(0, 8)}
         isSpectator={activeRoom.spectate}
-        onLeave={() => setActiveRoom(null)}
+        onLeave={(reason) => {
+          setRoomError(reason ?? null);
+          setActiveRoom(null);
+        }}
       />
     );
   }
@@ -33,7 +75,11 @@ export function GamesPage({ onBack, onRoomStateChange }: GamesPageProps) {
   return (
     <PlayMenu
       onBack={onBack}
-      onEnterRoom={(gameId, options) => setActiveRoom({ gameId, spectate: !!options?.spectate })}
+      initialError={roomError}
+      onEnterRoom={(gameId, options) => {
+        setRoomError(null);
+        setActiveRoom({ gameId, spectate: !!options?.spectate });
+      }}
     />
   );
 }

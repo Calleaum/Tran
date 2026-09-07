@@ -4,11 +4,13 @@ import {
   Post,
   Patch,
   Param,
+  Body,
   UseGuards,
   Request,
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { PresidentService } from './president.service';
+import { CreatePresidentGameDto } from './dto/create-president-game.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 
 @Controller('president')
@@ -44,8 +46,8 @@ export class PresidentController {
 
   // POST /president
   @Post()
-  create(@Request() req: any) {
-    return this.svc.create(req.user.id);
+  create(@Request() req: any, @Body() dto: CreatePresidentGameDto) {
+    return this.svc.create(req.user.id, dto.name, dto.maxPlayers);
   }
 
   // POST /president/:id/join

@@ -1,25 +1,41 @@
 import { useEffect, useState } from 'react';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { AuthCallback } from './pages/AuthCallback';
 import { authService } from './services/authService';
-import { TOKEN_KEY } from './services/api';
 import { FloatingCardsBackground } from './FloatingCardsBackground';
 import { ChatProvider } from './chat/ChatContext';
 import { ChatLauncher } from './chat/ChatLauncher';
 import { playMusic, resumeMusicIfNeeded } from './sound';
-import { APP_ROUTES, APP_ROUTES_SET, AUTH_ROUTES, AppRoute } from './routes';
+import { APP_ROUTES, APP_ROUTES_SET, AUTH_ROUTES, PUBLIC_ROUTES, AppRoute } from './routes';
 import { HomePage } from './pages/Home';
 import { GamesPage } from './pages/Games';
 import { SocialPage } from './pages/Social';
 import { ClassementPage } from './pages/Classement';
 import { TournamentPage } from './pages/Tournament';
 import { OptionsPage } from './pages/Options';
-import './App.css';
+import { PrivacyPage } from './pages/Privacy';
+import { TermsPage } from './pages/Terms';
+import './styles/base.css';
+import './styles/buttons.css';
+import './styles/menu.css';
+import './styles/submenu.css';
+import './styles/game.css';
+import './styles/tournament.css';
+import './styles/roles-panel.css';
+import './styles/options.css';
+import './styles/social.css';
+import './styles/chat.css';
+import './styles/game-menu-overlay.css';
+import './styles/floating-cards-bg.css';
+import './styles/hub.css';
+import './styles/modals.css';
 
 interface AuthUser {
   id: string;
   email: string;
   username: string;
+  avatar?: string | null;
 }
 
 function App() {
@@ -67,14 +83,9 @@ function App() {
     };
 
     void fetchUser();
-
-    const syncAuthState = (event: StorageEvent) => {
-      if (event.key !== TOKEN_KEY) return;
-      void refreshUser();
-    };
-
-    window.addEventListener('storage', syncAuthState);
-    return () => window.removeEventListener('storage', syncAuthState);
+    // Note : le token est en sessionStorage (isolé par onglet), donc pas de
+    // synchronisation cross-onglets ici — chaque onglet garde sa propre
+    // session, ce qui permet de se connecter avec 2 comptes différents.
   }, []);
 
   useEffect(() => {
@@ -98,6 +109,10 @@ function App() {
 
     if (!APP_ROUTES_SET.has(currentPath as AppRoute)) {
       navigate(isAuthed ? APP_ROUTES.home : APP_ROUTES.login, true);
+      return;
+    }
+
+    if (PUBLIC_ROUTES.has(currentPath as AppRoute)) {
       return;
     }
 
@@ -142,13 +157,40 @@ function App() {
     navigate(APP_ROUTES.login, true);
   };
 
+  // Mise à jour optimiste après upload d'un avatar (ProfileHub), pour éviter
+  // un aller-retour réseau juste pour rafraîchir l'affichage.
+  const handleAvatarChange = (avatar: string) => {
+    setUser((prev) => (prev ? { ...prev, avatar } : prev));
+  };
+
   const renderPage = () => {
+    if (path === APP_ROUTES.privacy) {
+      return <PrivacyPage onBack={() => navigate(user ? APP_ROUTES.home : APP_ROUTES.login)} />;
+    }
+
+    if (path === APP_ROUTES.terms) {
+      return <TermsPage onBack={() => navigate(user ? APP_ROUTES.home : APP_ROUTES.login)} />;
+    }
+
+    if (path === APP_ROUTES.authCallback) {
+      return (
+        <AuthCallback
+          onSuccess={() => {
+            void refreshUser().then(() => navigate(APP_ROUTES.home, true));
+          }}
+          onFailure={() => navigate(APP_ROUTES.login, true)}
+        />
+      );
+    }
+
     if (!user) {
       if (path === APP_ROUTES.register) {
         return (
           <Register
             onSuccess={handleLoginSuccess}
             onLoginClick={() => navigate(APP_ROUTES.login)}
+            onPrivacyClick={() => navigate(APP_ROUTES.privacy)}
+            onTermsClick={() => navigate(APP_ROUTES.terms)}
           />
         );
       }
@@ -157,6 +199,8 @@ function App() {
         <Login
           onSuccess={handleLoginSuccess}
           onRegisterClick={() => navigate(APP_ROUTES.register)}
+          onPrivacyClick={() => navigate(APP_ROUTES.privacy)}
+          onTermsClick={() => navigate(APP_ROUTES.terms)}
         />
       );
     }
@@ -179,7 +223,14 @@ function App() {
         return <OptionsPage onBack={() => navigate(APP_ROUTES.home)} />;
       case APP_ROUTES.home:
       default:
-        return <HomePage user={user} onNavigate={navigate} onLogout={handleLogout} />;
+        return (
+          <HomePage
+            user={user}
+            onNavigate={navigate}
+            onLogout={handleLogout}
+            onAvatarChange={handleAvatarChange}
+          />
+        );
     }
   };
 

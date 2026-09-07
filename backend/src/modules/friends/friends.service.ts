@@ -183,6 +183,7 @@ export class FriendsService {
     return rels.map((r) => ({
       id: r.addressee.id,
       username: r.addressee.username,
+      avatar: r.addressee.avatar,
     }));
   }
 

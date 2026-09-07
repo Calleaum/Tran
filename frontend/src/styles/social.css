@@ -1,0 +1,127 @@
+/* ==========================================================================
+   ÉCRAN SOCIAL — liste d'amis / bloqués
+   Extrait de l'ancien App.css (voir Home.tsx / App.tsx pour l'import).
+   ========================================================================== */
+
+/* ==========================================================================
+   ÉCRAN SOCIAL
+   ========================================================================== */
+
+.social-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+@media (max-width: 720px) {
+  .social-columns { grid-template-columns: 1fr; }
+}
+
+.social-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.social-column__title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--brass-300);
+  margin: 0;
+}
+
+.social-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.social-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  border: var(--toon-line) solid rgba(217, 180, 92, 0.25);
+  background: rgba(0,0,0,0.15);
+}
+
+/* Image d'avatar générique : remplit n'importe quel conteneur rond
+   (profile-hub, profile-card, social-row, etc.) sans avoir besoin de
+   connaître sa taille à l'avance. */
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.social-row__avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--ink-900);
+  background: linear-gradient(160deg, var(--brass-300), var(--brass-600));
+  border: 2px solid var(--toon-line-color);
+  position: relative;
+}
+.social-row__avatar::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--felt-900);
+}
+.social-row__avatar--online::after { background: #4caf6d; }
+.social-row__avatar--offline::after { background: #7a7a7a; }
+.social-row__avatar--in-game::after { background: var(--brass-400); }
+
+.social-row__info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.social-row__name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.social-row__status {
+  font-size: 0.72rem;
+  color: var(--cream-200);
+  opacity: 0.75;
+}
+
+.social-row__actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.social-column--blocked {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px dashed rgba(217, 180, 92, 0.3);
+}
+
+.social-row--blocked {
+  opacity: 0.75;
+  border-color: rgba(168, 40, 59, 0.35);
+}

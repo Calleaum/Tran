@@ -16,18 +16,33 @@ Stack moderno et complet pour un projet éducatif de gestion de tournois du Jeu 
 ### Lancer le projet avec Docker Compose
 
 ```bash
-# À la racine du projet
+# 1. Générer un certificat auto-signé (une seule fois, ou après expiration)
+sh certs/generate-certs.sh
+
+# 2. À la racine du projet
 docker compose up --build
 
-# Le site sera accessible à: http://localhost:3000
-# L'API sera accessible à: http://localhost:3001
+# Le site (front + API + websockets, tout passe par nginx) sera accessible à:
+# https://localhost:3000
 ```
+
+> ⚠️ Le certificat est auto-signé (usage développement/évaluation) : le
+> navigateur affiche un avertissement de sécurité la première fois, sur
+> `https://localhost:3000` uniquement. Cliquez sur "Avancé" → "Continuer
+> vers localhost" pour l'accepter.
+>
+> nginx est le seul point de terminaison TLS du projet : le frontend (Vite)
+> et le backend (NestJS) tournent toujours en HTTP en interne et ne sont pas
+> exposés au navigateur, donc il n'y a qu'un seul certificat à valider. Si
+> `certs/key.pem` et `certs/cert.pem` sont absents, nginx refusera de
+> démarrer : générez-les avec `sh certs/generate-certs.sh` avant de lancer
+> `docker compose up`.
 
 ### Structure du projet
 
 ```
 Transcendence/
-├── frontend/          # Application React (port 3000)
+├── frontend/          # Application React (port 5173, interne, HTTP, derrière nginx)
 │   ├── src/
 │   │   ├── chat/          # Chat global, MP, modales de profil
 │   │   ├── game/          # Table de jeu du Président (cartes, rôles, défausse)
@@ -39,7 +54,7 @@ Transcendence/
 │   ├── package.json
 │   ├── vite.config.ts
 │   └── Dockerfile
-├── backend/           # API NestJS (port 3001)
+├── backend/           # API NestJS (port 3001, interne, HTTP, derrière nginx)
 │   ├── src/
 │   │   ├── entities/      # User, PresidentGame, GameHistory, Friendship, Message
 │   │   ├── gateway/       # GameGateway (socket.io, parties de Président)
@@ -57,6 +72,9 @@ Transcendence/
 │   ├── package.json
 │   ├── tsconfig.json
 │   └── Dockerfile
+├── nginx/
+│   └── nginx.conf     # Point d'entrée HTTPS unique : /api, /socket.io → backend, / → frontend
+├── certs/             # cert.pem / key.pem auto-signés, montés dans nginx uniquement
 ├── docker-compose.yml
 └── .env              # Variables d'environnement
 ```
@@ -79,6 +97,14 @@ WebSocket (JWT dans `auth.token`) :
 
 Côté front, tout passe par `frontend/src/services/api.ts` (instance axios avec
 injection automatique du JWT) et `frontend/src/services/socket.ts`.
+
+## 🔒 Confidentialité
+
+Une page **Politique de confidentialité** (`/privacy`) est accessible sans
+connexion depuis les écrans de connexion/inscription. Elle décrit les
+données collectées, leur finalité, le stockage du JWT côté client, le
+chiffrement HTTPS/WSS et les droits RGPD (accès, rectification,
+suppression).
 
 ## 📝 Configuration
 

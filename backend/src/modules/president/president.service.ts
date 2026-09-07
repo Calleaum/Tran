@@ -32,13 +32,15 @@ export class PresidentService {
 
   // ─── CRUD basique ──────────────────────────────────────────────────────
 
-  async create(creatorId: string): Promise<PresidentGame> {
+  async create(creatorId: string, name?: string, maxPlayers?: number): Promise<PresidentGame> {
     const game = this.gameRepo.create({
       creatorId,
+      name: name?.trim() || null,
       playerIds: [creatorId],
       status: PresidentGameStatus.WAITING,
       state: null,
       finalRankings: [],
+      ...(maxPlayers ? { maxPlayers } : {}),
     });
     return this.gameRepo.save(game);
   }
@@ -342,6 +344,14 @@ export class PresidentService {
       titles: roleLabels,
     };
 
+    // Classement (wins/losses) + XP mis à jour automatiquement à la fin de
+    // CHAQUE manche, sans validation manuelle : dans une salle, on enchaîne
+    // souvent plusieurs manches d'affilée, et on veut que chacune compte
+    // pour le leaderboard, pas seulement quand quelqu'un clique un bouton
+    // "terminer la partie" qui n'existe d'ailleurs pas côté front.
+    await this.updateStats(state.lastCompletedRound.rankings, roleLabels);
+    await this.xpService.awardForGame(roleLabels);
+
     // Nouvelle manche : on redistribue d'abord des mains fraîches
     let newHands = this.rules.deal(state.playerIds);
     const transfers: CardTransfer[] = [];
@@ -421,35 +431,39 @@ export class PresidentService {
       roundNumber: roundsPlayed,
     };
 
-    // Mettre à jour les stats
-    await this.updateStats(finalRankings);
-
+    // Note : wins/losses et XP sont déjà appliqués manche par manche dans
+    // `endRound()` (voir plus haut) — on ne les réapplique pas ici pour ne
+    // pas compter deux fois la dernière manche jouée. `finish()` ne fait
+    // plus que figer le statut de la salle et archiver la partie complète.
     const saved = await this.gameRepo.save(game);
-
-    // XP : chaque joueur classé touche de l'XP selon son titre de fin de
-    // manche (Président, Vice-président, Neutre, Vice-trou du cul, Trou du
-    // cul). Fait avant l'historique pour pouvoir dénormaliser le détail
-    // de l'XP gagné dans la ligne d'historique de la partie.
-    const titles = finalRankings.length > 0 ? this.rules.getTitles(finalRankings) : {};
-    const xpResults = await this.xpService.awardForGame(titles);
-    const xpAwarded = Object.fromEntries(
-      Object.entries(xpResults).map(([userId, r]) => [userId, r.xpGained]),
-    );
 
     // Historique : capture immuable de la partie (idempotent, ne casse
     // jamais le flux de fin de partie même en cas de double appel)
-    await this.historyService.recordGame(saved, xpAwarded);
+    await this.historyService.recordGame(saved, {});
 
     return saved;
   }
 
-  private async updateStats(rankings: string[]): Promise<void> {
+  private async updateStats(rankings: string[], titles: Record<string, string>): Promise<void> {
     if (rankings.length === 0) return;
     // Président = victoire, Con = défaite, les autres = neutre
     const winnerId = rankings[0];
     const loserId = rankings[rankings.length - 1];
     await this.userRepo.increment({ id: winnerId }, 'wins', 1);
     await this.userRepo.increment({ id: loserId }, 'losses', 1);
+
+    // Compteurs de titres (leaderboard) : un par manche terminée, quel
+    // que soit le titre porté. Vice-président / Vice-trou du cul n'ont pas
+    // de colonne dédiée : on les compte dans `neutralCount` (comme "Neutre")
+    // via ce `else` général. C'est important : sans ça, ces joueurs ne
+    // recevraient AUCUN compteur pour la manche et redeviendraient
+    // indiscernables d'un joueur qui n'a jamais joué (0 victoire / 0
+    // défaite / 0 neutre) dans le classement — cf. getLeaderboard().
+    for (const [userId, title] of Object.entries(titles)) {
+      if (title === 'Président') await this.userRepo.increment({ id: userId }, 'presidentCount', 1);
+      else if (title === 'Trou du cul') await this.userRepo.increment({ id: userId }, 'trouducCount', 1);
+      else await this.userRepo.increment({ id: userId }, 'neutralCount', 1);
+    }
   }
 
   // ─── Vue publique (sans les mains des autres) ─────────────────────────

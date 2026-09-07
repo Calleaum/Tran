@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { SocialPlayer, STATUS_LABEL } from '../social/socialData';
 import { playerService } from '../services/api';
+import { PlayerAvatar } from '../components/PlayerAvatar';
 import { playHover } from '../sound';
 
 interface PlayerProfileModalProps {
@@ -42,9 +43,11 @@ export function PlayerProfileModal({ player, onClose, onTalk }: PlayerProfileMod
 
         <div className="modal-card__body">
           <div className="profile-card">
-            <div className={`profile-card__avatar social-row__avatar--${player.status}`}>
-              {player.name.charAt(0).toUpperCase()}
-            </div>
+            <PlayerAvatar
+              name={player.name}
+              avatar={player.avatar}
+              className={`profile-card__avatar social-row__avatar--${player.status}`}
+            />
             <div className="profile-card__info">
               <span className="profile-card__name">{player.name}</span>
               <span className="profile-card__email">{STATUS_LABEL[player.status]}</span>

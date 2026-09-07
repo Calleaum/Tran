@@ -1,0 +1,227 @@
+/* ==========================================================================
+   TOURNOI — configuration + tableau à élimination (bracket)
+   Extrait de l'ancien App.css (voir Home.tsx / App.tsx pour l'import).
+   ========================================================================== */
+
+/* ==========================================================================
+   TOURNOI — création
+   ========================================================================== */
+
+.tourney-config {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  max-width: 560px;
+}
+
+.tourney-config__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.tourney-config__field label {
+  font-size: 0.85rem;
+  color: var(--cream-200);
+  letter-spacing: 0.02em;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.pill {
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: 2px solid rgba(217, 180, 92, 0.4);
+  background: rgba(0,0,0,0.2);
+  color: var(--cream-100);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+}
+.pill:hover {
+  border-color: var(--brass-400);
+  transform: translateY(-2px);
+  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.3);
+}
+.pill--active {
+  background: linear-gradient(160deg, var(--brass-300), var(--brass-600));
+  color: var(--ink-900);
+  border-color: var(--toon-line-color);
+  box-shadow: 2px 3px 0 rgba(0, 0, 0, 0.35);
+}
+
+.tourney-config__summary {
+  padding: 1rem 1.25rem;
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(217, 180, 92, 0.2);
+  border-radius: 12px;
+}
+.tourney-config__summary p {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+}
+.tourney-config__summary p:last-child {
+  margin-bottom: 0;
+}
+
+/* ==========================================================================
+   TOURNOI — tableau (bracket)
+   ========================================================================== */
+
+.submenu-screen--wide {
+  max-width: 1500px;
+}
+
+.tourney-board-topbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.tourney-board-action {
+  margin-bottom: 1.75rem;
+}
+
+.bracket-board {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 50% -20%, rgba(217, 180, 92, 0.12), transparent 60%),
+    linear-gradient(180deg, var(--felt-800), var(--felt-900));
+  border: 1px solid rgba(217, 180, 92, 0.35);
+  box-shadow: 0 0 0 6px rgba(217, 180, 92, 0.08) inset;
+}
+
+.bracket-board__trophy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(217, 180, 92, 0.25);
+  text-align: center;
+}
+.bracket-board__trophy-icon {
+  font-size: 2.4rem;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+}
+.bracket-board__trophy-label {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--brass-300);
+}
+
+.bracket-board__section-label {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--brass-400);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+.bracket-board__section-label--losers {
+  color: #c98a6b;
+}
+
+.bracket-columns {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+.bracket-columns--losers {
+  opacity: 0.92;
+}
+
+.bracket-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 220px;
+}
+.bracket-column__title {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cream-200);
+  text-align: center;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px dashed rgba(217, 180, 92, 0.3);
+}
+.bracket-column__tables {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  justify-content: space-around;
+  flex: 1;
+}
+
+.bracket-table {
+  background: rgba(0,0,0,0.22);
+  border: 1px solid rgba(217, 180, 92, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.bracket-table--played {
+  border-color: rgba(217, 180, 92, 0.55);
+}
+.bracket-table__header {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink-900);
+  background: linear-gradient(160deg, var(--brass-300), var(--brass-600));
+}
+.bracket-table__qualify {
+  font-weight: 500;
+  text-transform: none;
+  opacity: 0.85;
+}
+.bracket-table__seats {
+  list-style: none;
+  margin: 0;
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.bracket-seat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  background: rgba(255,255,255,0.03);
+}
+.bracket-seat__rank {
+  width: 1.1rem;
+  text-align: center;
+  color: var(--brass-400);
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+.bracket-seat--qualified {
+  background: rgba(217, 180, 92, 0.16);
+}
+.bracket-seat--qualified .bracket-seat__name {
+  color: var(--brass-300);
+  font-weight: 600;
+}
+.bracket-seat--eliminated {
+  opacity: 0.45;
+}
+.bracket-seat--eliminated .bracket-seat__name {
+  text-decoration: line-through;
+}
+

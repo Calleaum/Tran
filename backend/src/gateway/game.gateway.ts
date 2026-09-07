@@ -13,18 +13,31 @@ import { Logger } from '@nestjs/common';
 import { PresidentService } from 'src/modules/president/president.service';
 import { Card, PresidentGameStatus } from 'src/entities/president-game.entity';
 import { RateLimiterService } from 'src/modules/chat/rate-limit/rate-limiter.service';
+import { resolveCorsOrigin } from 'src/common/cors.util';
 
 interface AuthSocket extends Socket {
   userId?: string;
 }
 
 @WebSocketGateway({
-  cors: { origin: process.env.CORS_ORIGIN || 'http://localhost:3000', credentials: true },
+  cors: { origin: resolveCorsOrigin(), credentials: true },
 })
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server!: Server;
   private logger = new Logger('GameGateway');
   private connectedUsers = new Map<string, string>(); // socketId → userId
+
+  // Un F5 (ou une coupure réseau brève) déclenche une vraie déconnexion
+  // socket.io, immédiatement suivie d'une reconnexion automatique du
+  // client quelques dizaines/centaines de ms plus tard. Sans délai de
+  // grâce ici, `handleDisconnect` retirait le joueur de la partie
+  // (`presidentService.leave`) avant même que le client ait eu le temps
+  // de se reconnecter et de refaire `president:join_room` — un simple
+  // rafraîchissement de page faisait donc perdre la partie pour de vrai.
+  // On retarde le retrait effectif et on l'annule si le même userId se
+  // reconnecte (sur n'importe quel socket) avant l'expiration du délai.
+  private static readonly DISCONNECT_GRACE_MS = 15_000;
+  private pendingDisconnects = new Map<string, NodeJS.Timeout>(); // userId → timer
 
   constructor(
     private jwtService: JwtService,
@@ -48,7 +61,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.userId = payload.sub;
       this.connectedUsers.set(client.id, payload.sub);
       client.join(`user:${payload.sub}`);
-      this.server.emit('user:online', { userId: payload.sub });
+
+      // Reconnexion à temps (F5, coupure réseau…) : on annule le retrait
+      // programmé par le `handleDisconnect` précédent, sans jamais avoir
+      // émis `user:offline` ni fait quitter la partie — la reconnexion est
+      // donc totalement invisible pour les autres joueurs.
+      const pending = this.pendingDisconnects.get(payload.sub);
+      if (pending) {
+        clearTimeout(pending);
+        this.pendingDisconnects.delete(payload.sub);
+        this.logger.log(`Reconnected in time: ${payload.sub}`);
+      } else {
+        this.server.emit('user:online', { userId: payload.sub });
+      }
+
       this.logger.log(`Connected: ${payload.sub}`);
     } catch {
       client.disconnect();
@@ -57,8 +83,23 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: AuthSocket) {
     const userId = this.connectedUsers.get(client.id);
-    if (userId) {
-      this.connectedUsers.delete(client.id);
+    if (!userId) return;
+
+    this.connectedUsers.delete(client.id);
+
+    // Le même utilisateur a peut-être un autre onglet/socket encore
+    // ouvert : dans ce cas il n'a pas vraiment quitté, on ne programme
+    // rien.
+    const stillConnectedElsewhere = Array.from(this.connectedUsers.values()).includes(userId);
+    if (stillConnectedElsewhere) return;
+
+    // Un timer était déjà en cours pour cet utilisateur (déconnexions
+    // rapprochées) : on le remplace plutôt que d'en empiler un second.
+    const existing = this.pendingDisconnects.get(userId);
+    if (existing) clearTimeout(existing);
+
+    const timer = setTimeout(() => {
+      this.pendingDisconnects.delete(userId);
       this.server.emit('user:offline', { userId });
 
       void (async () => {
@@ -71,8 +112,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       })();
 
-      this.logger.log(`Disconnected: ${userId}`);
-    }
+      this.logger.log(`Disconnected (grace period expired): ${userId}`);
+    }, GameGateway.DISCONNECT_GRACE_MS);
+
+    this.pendingDisconnects.set(userId, timer);
   }
 
   // ─── Rejoindre une salle de jeu ────────────────────────────────────────
@@ -278,7 +321,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
     }
 
-    if (game.status === PresidentGameStatus.CANCELLED || !game.state) {
+    if (game.status === PresidentGameStatus.CANCELLED) {
       this.server.to(`president:${game.id}`).emit('president:game_finished', {
         gameId: game.id,
         status: game.status,
@@ -287,6 +330,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         titles: game.finalRankings.length > 0 ? this.presidentService.getTitles(game.finalRankings) : {},
         events,
       });
+      return;
+    }
+
+    // La partie est encore en salle d'attente (pas encore démarrée) :
+    // `game.state` est null par construction (voir `create()`), ce n'est
+    // pas une fin de partie. Le `president:player_left` déjà émis plus
+    // haut suffit à informer les autres joueurs restants.
+    if (!game.state) {
       return;
     }
 

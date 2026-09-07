@@ -6,6 +6,7 @@ export interface SocialPlayer {
   id: string;
   name: string;
   status: 'online' | 'offline' | 'in-game';
+  avatar?: string | null;
 }
 
 export const STATUS_LABEL: Record<SocialPlayer['status'], string> = {
@@ -44,9 +45,18 @@ export interface ApiPlayer {
 }
 
 export function friendToSocialPlayer(friend: ApiFriend): SocialPlayer {
-  return { id: friend.id, name: friend.username, status: friend.online ? 'online' : 'offline' };
+  return {
+    id: friend.id,
+    name: friend.username,
+    status: friend.online ? 'online' : 'offline',
+    avatar: friend.avatar,
+  };
 }
 
-export function playerToSocialPlayer(player: { id: string; username: string }): SocialPlayer {
-  return { id: player.id, name: player.username, status: 'offline' };
+export function playerToSocialPlayer(player: {
+  id: string;
+  username: string;
+  avatar?: string | null;
+}): SocialPlayer {
+  return { id: player.id, name: player.username, status: 'offline', avatar: player.avatar };
 }

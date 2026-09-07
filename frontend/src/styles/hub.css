@@ -1,0 +1,387 @@
+/* ==========================================================================
+   HUB D'ACCUEIL — écran d'accueil actuel (quêtes / profil / amis / bouton Jouer)
+   Extrait de l'ancien App.css (voir Home.tsx / App.tsx pour l'import).
+   ========================================================================== */
+
+/* ==========================================================================
+   MENU PRINCIPAL — hub façon "écran d'accueil" (quêtes / profil / amis / chat)
+   ========================================================================== */
+
+.menu-screen--hub {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.menu-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+.menu-tab {
+  padding: 0.5rem 1.1rem;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: transparent;
+  color: var(--cream-200);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.menu-tab:hover:not(:disabled) {
+  background: rgba(217, 180, 92, 0.1);
+  border-color: rgba(217, 180, 92, 0.3);
+}
+.menu-tab--active {
+  color: var(--brass-300);
+  border-color: var(--brass-400);
+  background: rgba(217, 180, 92, 0.14);
+  cursor: default;
+}
+.menu-tab:disabled {
+  opacity: 1;
+}
+
+.menu-hub {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 300px 1fr 280px;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem 1.5rem;
+  min-height: 0;
+}
+
+@media (max-width: 980px) {
+  .menu-hub {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+}
+
+.menu-hub__left {
+  min-height: 0;
+  display: flex;
+}
+.menu-hub__left .chat-panel {
+  width: 100%;
+  border-right: none;
+  border: var(--toon-line) solid rgba(217, 180, 92, 0.35);
+  border-radius: 14px;
+}
+
+.menu-hub__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  min-height: 0;
+}
+
+.menu-hub__right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-height: 0;
+}
+
+/* ---- Quêtes ---- */
+.quest-panel {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(0,0,0,0.2);
+  border: var(--toon-line) solid rgba(217, 180, 92, 0.3);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+}
+.quest-panel__title {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--brass-300);
+  margin-bottom: 0.6rem;
+}
+.quest-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.quest-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  padding: 0.3rem 0;
+}
+.quest-row__check {
+  width: 1.1rem;
+  text-align: center;
+  color: var(--cream-200);
+  opacity: 0.6;
+}
+.quest-row--done .quest-row__check {
+  color: #4caf6d;
+  opacity: 1;
+}
+.quest-row__label {
+  flex: 1;
+}
+.quest-row--done .quest-row__label {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+.quest-row__xp {
+  color: var(--brass-400);
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+/* ---- Profil central ---- */
+.profile-hub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.profile-hub__avatar-wrap {
+  position: relative;
+}
+.profile-hub__avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, var(--brass-300), var(--brass-600));
+  border: var(--toon-line) solid var(--toon-line-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--ink-900);
+  box-shadow: var(--toon-shadow);
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.12s ease;
+}
+.profile-hub__avatar:hover:not(:disabled) {
+  transform: translate(-1px, -2px);
+  filter: brightness(1.06);
+}
+.profile-hub__avatar:disabled {
+  cursor: wait;
+  opacity: 0.75;
+}
+.profile-hub__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.profile-hub__avatar-edit {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--felt-900);
+  border: 2px solid var(--toon-line-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: var(--cream-200);
+}
+.profile-hub__avatar-input {
+  display: none;
+}
+.profile-hub__avatar-error {
+  font-size: 0.72rem;
+  color: var(--danger-400, #e05555);
+  text-align: center;
+  max-width: 160px;
+}
+.profile-hub__badge {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--felt-900);
+  border: 2px solid var(--toon-line-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+.profile-hub__name {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-top: 0.35rem;
+}
+.profile-hub__rank {
+  font-size: 0.85rem;
+  color: var(--brass-300);
+}
+.profile-hub__xp-bar {
+  width: 220px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.4);
+  border: 2px solid var(--toon-line-color);
+  overflow: hidden;
+  margin-top: 0.4rem;
+}
+.profile-hub__xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--brass-600), var(--brass-300));
+  transition: width 0.4s ease;
+}
+.profile-hub__xp-label {
+  font-size: 0.72rem;
+  color: var(--cream-200);
+  opacity: 0.75;
+}
+
+/* ---- Bouton Jouer (colonne de droite) ---- */
+.play-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.1rem;
+  border-radius: 16px;
+  border: var(--toon-line) solid var(--toon-line-color);
+  background: linear-gradient(160deg, var(--brass-300), var(--brass-600));
+  color: var(--ink-900);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--toon-shadow);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+}
+.play-cta:hover {
+  transform: translate(-3px, -4px) scale(1.02);
+  box-shadow: 7px 9px 0 rgba(0, 0, 0, 0.4);
+}
+.play-cta:active {
+  transform: translate(0, 0) scale(0.97);
+  box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.35);
+}
+.play-cta__icon {
+  font-size: 1.5rem;
+}
+
+/* ---- Panneau amis ---- */
+.friends-panel {
+  background: rgba(0,0,0,0.2);
+  border: var(--toon-line) solid rgba(217, 180, 92, 0.3);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.friends-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+.friends-panel__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--brass-300);
+  font-size: 0.95rem;
+}
+.friends-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  overflow-y: auto;
+}
+.friends-panel__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 8px;
+}
+.friends-panel__row:hover {
+  background: rgba(217, 180, 92, 0.08);
+}
+.friends-panel__identity {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  min-width: 0;
+  flex: 1;
+}
+.friends-panel__name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.friends-panel__status {
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+.friends-panel__more {
+  margin-top: 0.6rem;
+  align-self: center;
+}
+.friends-panel__empty {
+  font-size: 0.8rem;
+}
+
+.social-row__avatar--small {
+  width: 26px;
+  height: 26px;
+  font-size: 0.75rem;
+}
+
+
+/* Récompenses (badges) listées sous la barre d'XP du hub de profil. */
+.profile-hub__awards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: center;
+  margin-top: 0.6rem;
+}
+.profile-hub__award {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 180, 92, 0.35);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+/* Panneau de quêtes vide (aucun système de quêtes branché). */
+.quest-panel__empty {
+  margin: 0.4rem 0 0;
+}

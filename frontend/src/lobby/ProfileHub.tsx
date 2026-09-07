@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
-import { xpService } from '../services/api';
+import { useEffect, useRef, useState } from 'react';
+import { xpService, playerService, resolveAvatarUrl } from '../services/api';
 
 interface ProfileHubProps {
+  userId: string;
   username: string;
+  avatar?: string | null;
+  onAvatarChange?: (avatar: string) => void;
 }
 
 // Renvoyé par `GET /xp/me` (XpService.getProfile).
@@ -14,8 +17,11 @@ interface XpProfile {
   xpForNextLevel: number;
 }
 
-export function ProfileHub({ username }: ProfileHubProps) {
+export function ProfileHub({ userId, username, avatar, onAvatarChange }: ProfileHubProps) {
   const [profile, setProfile] = useState<XpProfile | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -30,11 +36,52 @@ export function ProfileHub({ username }: ProfileHubProps) {
     ? Math.min(100, Math.round((profile.xpIntoLevel / profile.xpForNextLevel) * 100))
     : 0;
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // permet de re-choisir le même fichier plus tard
+    if (!file) return;
+
+    setUploadError(null);
+    setUploading(true);
+    try {
+      const updated = await playerService.uploadAvatar(userId, file);
+      onAvatarChange?.(updated.avatar);
+    } catch (err: any) {
+      setUploadError(err.response?.data?.message || "Envoi de la photo impossible");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const avatarUrl = resolveAvatarUrl(avatar);
+
   return (
     <div className="profile-hub">
       <div className="profile-hub__avatar-wrap">
-        <div className="profile-hub__avatar">{username.charAt(0).toUpperCase()}</div>
+        <button
+          type="button"
+          className="profile-hub__avatar profile-hub__avatar--editable"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          title="Changer de photo de profil"
+        >
+          {avatarUrl ? (
+            <img className="profile-hub__avatar-img" src={avatarUrl} alt={username} />
+          ) : (
+            username.charAt(0).toUpperCase()
+          )}
+          <span className="profile-hub__avatar-edit">{uploading ? '…' : '✎'}</span>
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          className="profile-hub__avatar-input"
+          onChange={handleFileChange}
+        />
       </div>
+
+      {uploadError && <p className="profile-hub__avatar-error">{uploadError}</p>}
 
       <div className="profile-hub__name">{username}</div>
       <div className="profile-hub__rank">

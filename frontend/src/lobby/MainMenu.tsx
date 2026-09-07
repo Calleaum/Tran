@@ -9,12 +9,13 @@ import { useChat } from '../chat/ChatContext';
 import { APP_ROUTES, AppRoute } from '../routes';
 
 interface MainMenuProps {
-  user: { id: string; username: string };
+  user: { id: string; username: string; avatar?: string | null };
   onNavigate: (dest: AppRoute) => void;
   onLogout: () => void;
+  onAvatarChange: (avatar: string) => void;
 }
 
-export function MainMenu({ user, onNavigate, onLogout }: MainMenuProps) {
+export function MainMenu({ user, onNavigate, onLogout, onAvatarChange }: MainMenuProps) {
   const social = useSocial(user.id);
   const { isOnline } = useChat();
   const [chatFocus, setChatFocus] = useState<string | null>(null);
@@ -62,7 +63,12 @@ export function MainMenu({ user, onNavigate, onLogout }: MainMenuProps) {
 
         <div className="menu-hub__center">
           <QuestPanel />
-          <ProfileHub username={user.username} />
+          <ProfileHub
+            userId={user.id}
+            username={user.username}
+            avatar={user.avatar}
+            onAvatarChange={onAvatarChange}
+          />
         </div>
 
         <div className="menu-hub__right">

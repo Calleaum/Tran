@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { playHover, playClick } from '../sound';
 import { playerService } from '../services/api';
 import { ApiPlayer } from '../social/socialData';
+import { PlayerAvatar } from '../components/PlayerAvatar';
 import { TournamentPlayer } from './bracket';
 
 interface CreateTournamentProps {
@@ -68,9 +69,12 @@ export function CreateTournament({ onBack, onCreate }: CreateTournamentProps) {
                       checked={selected.has(player.id)}
                       onChange={() => toggle(player.id)}
                     />
-                    <span className="social-row__avatar social-row__avatar--small">
-                      {player.username.charAt(0)}
-                    </span>
+                    <PlayerAvatar
+                      as="span"
+                      name={player.username}
+                      avatar={player.avatar}
+                      className="social-row__avatar social-row__avatar--small"
+                    />
                     <span>{player.username}</span>
                   </label>
                 </li>

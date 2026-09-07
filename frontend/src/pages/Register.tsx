@@ -6,9 +6,11 @@ import '../styles/Auth.css';
 interface RegisterProps {
   onSuccess: (user: any) => void;
   onLoginClick: () => void;
+  onPrivacyClick: () => void;
+  onTermsClick: () => void;
 }
 
-export function Register({ onSuccess, onLoginClick }: RegisterProps) {
+export function Register({ onSuccess, onLoginClick, onPrivacyClick, onTermsClick }: RegisterProps) {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -126,6 +128,28 @@ export function Register({ onSuccess, onLoginClick }: RegisterProps) {
           >
             Se connecter
           </button>
+        </p>
+
+        <p className="auth-switch auth-switch--small">
+          En créant un compte, tu acceptes notre{' '}
+          <button
+            type="button"
+            className="auth-switch__link"
+            onMouseEnter={playHover}
+            onClick={() => { playClick(); onPrivacyClick(); }}
+          >
+            politique de confidentialité
+          </button>
+          {' '}et nos{' '}
+          <button
+            type="button"
+            className="auth-switch__link"
+            onMouseEnter={playHover}
+            onClick={() => { playClick(); onTermsClick(); }}
+          >
+            conditions d'utilisation
+          </button>
+          .
         </p>
       </div>
     </div>

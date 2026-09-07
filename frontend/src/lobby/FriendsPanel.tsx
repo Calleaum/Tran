@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { SocialPlayer, STATUS_LABEL } from '../social/socialData';
 import { PlayerProfileModal } from '../chat/PlayerProfileModal';
+import { PlayerAvatar } from '../components/PlayerAvatar';
 import { useChat } from '../chat/ChatContext';
 import { playHover, playClick } from '../sound';
 
@@ -53,9 +54,12 @@ export function FriendsPanel({ friends, loading, onOpenSocial, onOpenChatWith }:
                 onMouseEnter={playHover}
                 onClick={() => { playClick(); setViewingProfile(friend); }}
               >
-                <span className={`social-row__avatar social-row__avatar--small social-row__avatar--${friend.status}`}>
-                  {friend.name.charAt(0)}
-                </span>
+                <PlayerAvatar
+                  as="span"
+                  name={friend.name}
+                  avatar={friend.avatar}
+                  className={`social-row__avatar social-row__avatar--small social-row__avatar--${friend.status}`}
+                />
                 <span className="friends-panel__name">{friend.name}</span>
               </button>
               <span className="friends-panel__status" title={STATUS_LABEL[friend.status]}>

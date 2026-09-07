@@ -1,0 +1,283 @@
+/* ==========================================================================
+   CHAT — panneau (jeu + lobby), bulle flottante, onglets de groupe
+   Extrait de l'ancien App.css (voir Home.tsx / App.tsx pour l'import).
+   ========================================================================== */
+
+/* ==========================================================================
+   CHAT — panneau partagé (global + privé), ancré en jeu ou flottant en menu
+   ========================================================================== */
+
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, rgba(0,0,0,0.32), rgba(0,0,0,0.44));
+  border: var(--toon-line) solid rgba(217, 180, 92, 0.35);
+  color: var(--cream-100);
+  overflow: hidden;
+}
+
+.chat-panel--game {
+  width: 300px;
+  flex-shrink: 0;
+  border-top: none;
+  border-bottom: none;
+  border-left: none;
+  border-right: var(--toon-line) solid rgba(217, 180, 92, 0.35);
+}
+
+.chat-panel--lobby {
+  width: 340px;
+  height: 460px;
+  border-radius: 18px;
+  box-shadow: var(--toon-shadow);
+}
+
+.chat-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(217, 180, 92, 0.25);
+  flex-shrink: 0;
+}
+.chat-panel__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--brass-300);
+}
+.chat-panel__close {
+  background: none;
+  border: none;
+  color: var(--cream-100);
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.chat-panel__close:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.chat-panel__tabs {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.6rem 0.75rem;
+  overflow-x: auto;
+  border-bottom: 1px solid rgba(217, 180, 92, 0.18);
+  flex-shrink: 0;
+}
+.chat-panel__tab {
+  position: relative;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 2px solid rgba(217, 180, 92, 0.3);
+  background: rgba(0,0,0,0.2);
+  color: var(--cream-100);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.chat-panel__tab:hover {
+  border-color: var(--brass-400);
+}
+.chat-panel__tab--active {
+  background: linear-gradient(160deg, var(--brass-300), var(--brass-600));
+  color: var(--ink-900);
+  border-color: var(--toon-line-color);
+}
+.chat-panel__tab--pending {
+  opacity: 0.8;
+}
+.chat-panel__tab-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 0.35rem;
+  border-radius: 50%;
+  background: var(--brass-400);
+  animation: opponent-pulse 1.4s ease-in-out infinite;
+}
+
+.chat-panel__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-height: 0;
+}
+.chat-panel__empty {
+  font-size: 0.8rem;
+  color: var(--cream-200);
+  opacity: 0.6;
+  text-align: center;
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+.chat-panel__message {
+  max-width: 90%;
+  padding: 0.5rem 0.7rem;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(217, 180, 92, 0.15);
+  align-self: flex-start;
+}
+.chat-panel__message--me {
+  align-self: flex-end;
+  background: linear-gradient(160deg, rgba(217, 180, 92, 0.28), rgba(217, 180, 92, 0.12));
+  border-color: rgba(217, 180, 92, 0.4);
+}
+.chat-panel__message--system {
+  align-self: center;
+  background: transparent;
+  border: none;
+  padding: 0.15rem 0.5rem;
+  max-width: 100%;
+}
+.chat-panel__message--system .chat-panel__message-text {
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--cream-200);
+  opacity: 0.7;
+  text-align: center;
+}
+
+.chat-panel__message-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.15rem;
+}
+.chat-panel__message-author {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--brass-300);
+}
+.chat-panel__message-time {
+  font-size: 0.65rem;
+  color: var(--cream-200);
+  opacity: 0.55;
+}
+.chat-panel__message-text {
+  font-size: 0.85rem;
+  line-height: 1.35;
+  margin: 0;
+  word-break: break-word;
+}
+
+.chat-panel__end-dm {
+  align-self: center;
+  margin: 0 0.75rem 0.5rem;
+}
+
+.chat-panel__input-row {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-top: 1px solid rgba(217, 180, 92, 0.2);
+  flex-shrink: 0;
+}
+.chat-panel__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(217, 180, 92, 0.35);
+  background: rgba(0,0,0,0.3);
+  color: var(--cream-100);
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+}
+.chat-panel__input:focus {
+  outline: none;
+  border-color: var(--brass-400);
+  box-shadow: 0 0 0 3px rgba(217, 180, 92, 0.2);
+}
+.chat-panel__input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- Bulle de chat flottante (menus) ---- */
+.chat-launcher {
+  position: fixed;
+  left: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.chat-launcher__panel {
+  order: -1;
+}
+.chat-launcher__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border-radius: 50%;
+  border: var(--toon-line) solid var(--toon-line-color);
+  background: linear-gradient(160deg, var(--brass-300), var(--brass-600));
+  color: var(--ink-900);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--toon-shadow);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+}
+.chat-launcher__btn svg {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+.chat-launcher__btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 6px 8px 0 rgba(0, 0, 0, 0.4);
+}
+.chat-launcher__btn--active {
+  background: linear-gradient(160deg, var(--felt-700), var(--felt-900));
+  color: var(--brass-300);
+  border-color: var(--brass-400);
+}
+
+@media (max-width: 640px) {
+  .chat-launcher__panel .chat-panel--lobby {
+    width: min(90vw, 340px);
+  }
+}
+
+
+/* ---- Onglets de groupe dans le chat ---- */
+.chat-panel__tab--group {
+  font-weight: 600;
+}
+.chat-panel__group-members {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.72rem;
+  color: var(--cream-200);
+  opacity: 0.75;
+  border-bottom: 1px dashed rgba(217, 180, 92, 0.2);
+}
+
+
+/* Erreur remontée par le chat (envoi refusé, limite de débit...). */
+.chat-panel__error {
+  margin: 0 0.6rem 0.4rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid rgba(200, 70, 70, 0.5);
+  background: rgba(200, 70, 70, 0.14);
+  font-size: 0.78rem;
+  cursor: pointer;
+}

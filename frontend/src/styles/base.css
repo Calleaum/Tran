@@ -1,0 +1,82 @@
+/* ==========================================================================
+   BASE — variables de thème, reset, écran de chargement
+   Extrait de l'ancien App.css (voir Home.tsx / App.tsx pour l'import).
+   ========================================================================== */
+
+/* ==========================================================================
+   Le Jeu du Président — thème "table feutrée"
+   Palette : vert billard profond, laiton/or pour les accents, crème cassé
+   pour le texte. Les cartes ont une vraie diagonale de lumière et une
+   texture de feutre en fond de table.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --felt-900: #0b2e21;
+  --felt-800: #103a2a;
+  --felt-700: #16503a;
+  --brass-400: #d9b45c;
+  --brass-300: #e8cd85;
+  --brass-600: #a9822f;
+  --cream-100: #f4ecd8;
+  --cream-200: #e9dfc4;
+  --ink-900: #16110a;
+  --red-suit: #a8283b;
+  --black-suit: #17140f;
+  --danger: #c0463f;
+
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Style "cartoon" : contours épais façon bande dessinée + ombre portée nette */
+  --toon-line: 3px;
+  --toon-line-color: #1a140b;
+  --toon-shadow: 5px 6px 0 rgba(0, 0, 0, 0.35);
+  --toon-shadow-sm: 3px 4px 0 rgba(0, 0, 0, 0.32);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Le "vrai" fond de l'application : feutre vert opaque, toujours visible
+   derrière les cartes animées et le contenu. Les écrans (menu, sous-menus,
+   table) restent transparents pour laisser ce fond transparaître. */
+html,
+body,
+#root {
+  min-height: 100%;
+  background: radial-gradient(circle at 50% 40%, var(--felt-700) 0%, var(--felt-800) 55%, var(--felt-900) 100%);
+}
+
+.app,
+.app-loading,
+.menu-screen,
+.submenu-screen,
+.table-screen {
+  font-family: var(--font-body);
+  color: var(--cream-100);
+}
+
+/* ---- Loading ---- */
+.app-loading {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: transparent;
+}
+.app-loading__suit {
+  font-size: 2.5rem;
+  color: var(--brass-400);
+  animation: spin-pulse 1.4s ease-in-out infinite;
+}
+@keyframes spin-pulse {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.7; }
+  50% { transform: scale(1.15) rotate(8deg); opacity: 1; }
+}
+

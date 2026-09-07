@@ -1,0 +1,370 @@
+/* ==========================================================================
+   TABLE DE JEU — plateau, cartes à jouer (.pcard), main du joueur
+   Extrait de l'ancien App.css (voir Home.tsx / App.tsx pour l'import).
+   ========================================================================== */
+
+/* ==========================================================================
+   TABLE DE JEU
+   ========================================================================== */
+
+.table-screen {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+.table-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.75rem;
+  border-bottom: 1px solid rgba(217, 180, 92, 0.2);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.table-room-name {
+  font-size: 0.9rem;
+  color: var(--cream-200);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.spectator-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(217, 180, 92, 0.18);
+  border: 1px solid rgba(217, 180, 92, 0.5);
+  color: var(--brass-300);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.table-status {
+  font-size: 0.9rem;
+  color: var(--brass-300);
+  font-style: italic;
+}
+
+.table-layout {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.table-felt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  position: relative;
+}
+
+.opponents-row {
+  display: flex;
+  justify-content: center;
+  gap: 2.25rem;
+  flex-wrap: wrap;
+}
+
+.opponent-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1rem 1.4rem 0.85rem;
+  border-radius: 16px;
+  border: var(--toon-line) solid rgba(217, 180, 92, 0.45);
+  background: linear-gradient(160deg, rgba(255,255,255,0.05), rgba(0,0,0,0.22));
+  box-shadow: var(--toon-shadow-sm);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, box-shadow 0.15s ease;
+}
+.opponent-frame--hover {
+  transform: translateY(-4px);
+  border-color: var(--brass-400);
+  box-shadow: 6px 7px 0 rgba(0, 0, 0, 0.35);
+}
+.opponent-frame--turn {
+  border-color: var(--brass-400);
+  background: linear-gradient(160deg, rgba(217, 180, 92, 0.18), rgba(0,0,0,0.2));
+  box-shadow: 0 0 0 3px rgba(217, 180, 92, 0.25), var(--toon-shadow-sm);
+  animation: opponent-pulse 1.6s ease-in-out infinite;
+}
+@keyframes opponent-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(217, 180, 92, 0.25), var(--toon-shadow-sm); }
+  50% { box-shadow: 0 0 0 6px rgba(217, 180, 92, 0.4), var(--toon-shadow-sm); }
+}
+.opponent__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, var(--felt-700), var(--felt-900));
+  border: var(--toon-line) solid var(--toon-line-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--brass-300);
+}
+.opponent__info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.2;
+}
+.opponent__name {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.opponent__count {
+  font-size: 0.72rem;
+  color: var(--cream-200);
+  opacity: 0.75;
+}
+.opponent__mini-hand {
+  display: flex;
+  height: 34px;
+  margin-top: 0.15rem;
+}
+
+.opponent__talk-btn {
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 2px solid rgba(217, 180, 92, 0.45);
+  background: rgba(0,0,0,0.25);
+  color: var(--cream-100);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.15s ease, background 0.15s ease;
+}
+.opponent__talk-btn:hover:not(:disabled) {
+  border-color: var(--brass-400);
+  background: rgba(217, 180, 92, 0.16);
+  transform: translateY(-2px);
+}
+.opponent__talk-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.table-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+}
+
+.table-rules-hint {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--cream-200);
+  opacity: 0.75;
+  padding-bottom: 0.5rem;
+}
+
+.spectator-badge {
+  position: absolute;
+  bottom: 1rem;
+  right: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: var(--toon-line) solid rgba(217, 180, 92, 0.45);
+  background: rgba(0,0,0,0.4);
+  color: var(--cream-100);
+  font-size: 0.78rem;
+  font-weight: 700;
+  box-shadow: var(--toon-shadow-sm);
+}
+
+.hand-area--spectator {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.75rem 1rem;
+}
+.hand-area--spectator .placeholder-note {
+  max-width: 520px;
+  opacity: 0.85;
+}
+
+.table-menu-btn {
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+/* ---- Tas central ---- */
+.discard-pile {
+  position: relative;
+  width: 320px;
+  height: 300px;
+}
+.discard-pile--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--toon-line) dashed rgba(217, 180, 92, 0.4);
+  border-radius: 20px;
+}
+.discard-pile__hint {
+  font-size: 0.9rem;
+  color: var(--cream-200);
+  opacity: 0.65;
+  font-weight: 600;
+}
+.discard-pile__play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+.discard-pile__play--latest {
+  animation: card-drop 0.32s cubic-bezier(0.22, 1.1, 0.4, 1.15);
+}
+@keyframes card-drop {
+  0% { transform: translate(-50%, -220%) scale(0.7) rotate(-14deg); opacity: 0; }
+  65% { transform: translate(-50%, -42%) scale(1.08); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* ==========================================================================
+   CARTES — style cartoon : contour épais, coins généreux, pips expressifs
+   ========================================================================== */
+
+.pcard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 84px;
+  height: 118px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #fffdf6, #f2ead4);
+  border: var(--toon-line) solid var(--toon-line-color);
+  box-shadow: var(--toon-shadow-sm), 0 1px 0 rgba(255,255,255,0.5) inset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--font-display);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease;
+}
+
+/* Cartes du tas central : bien plus grandes, pour que la table joue son rôle
+   de pièce maîtresse visuelle. */
+.pcard--large {
+  width: 132px;
+  height: 184px;
+  border-radius: 18px;
+  box-shadow: 6px 8px 0 rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255,255,255,0.5) inset;
+}
+.pcard--large .pcard__rank { font-size: 1.5rem; }
+.pcard--large .pcard__suit { font-size: 1.15rem; }
+.pcard--large .pcard__pip { font-size: 3.4rem; }
+.pcard--large .pcard__corner--tl { top: 10px; left: 10px; }
+.pcard--large .pcard__corner--br { bottom: 10px; right: 10px; }
+
+/* Dans la main du joueur, les cartes ne sont pas en position absolute */
+.hand-cards .pcard {
+  position: relative;
+  top: auto;
+  left: auto;
+}
+.hand-cards .pcard:hover:not(.pcard--disabled) {
+  transform: translateY(-14px) scale(1.06) rotate(-1deg);
+  box-shadow: 5px 8px 0 rgba(0, 0, 0, 0.4);
+  z-index: 50 !important;
+}
+
+.pcard--red { color: var(--red-suit); }
+.pcard--black { color: var(--black-suit); }
+
+.pcard--selected {
+  box-shadow: 0 0 0 3px var(--brass-400), 5px 7px 0 rgba(0, 0, 0, 0.4);
+}
+
+.pcard--disabled {
+  cursor: default;
+  filter: saturate(0.7) brightness(0.92);
+}
+
+.pcard--back {
+  background:
+    repeating-linear-gradient(135deg, var(--felt-700) 0 6px, var(--felt-800) 6px 12px);
+  border: var(--toon-line) solid rgba(217, 180, 92, 0.6);
+  box-shadow: var(--toon-shadow-sm);
+  cursor: default;
+}
+
+.pcard--small {
+  width: 58px;
+  height: 82px;
+  border-radius: 10px;
+}
+.pcard--tiny {
+  position: relative;
+  width: 32px;
+  height: 45px;
+  border-radius: 7px;
+  border-width: 2px;
+}
+
+.pcard__corner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+.pcard__corner--tl { top: 7px; left: 7px; }
+.pcard__corner--br { bottom: 7px; right: 7px; transform: rotate(180deg); }
+.pcard__rank { font-size: 0.95rem; }
+.pcard__suit { font-size: 0.8rem; }
+.pcard__pip {
+  font-size: 2.2rem;
+  opacity: 0.92;
+  filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.08));
+}
+
+/* ==========================================================================
+   MAIN DU JOUEUR
+   ========================================================================== */
+
+.hand-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 1rem 2rem;
+  border-top: 1px solid rgba(217, 180, 92, 0.2);
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,0.15));
+}
+
+.hand-cards {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: 120px;
+}
+
+.hand-actions {
+  display: flex;
+  gap: 1rem;
+}
+

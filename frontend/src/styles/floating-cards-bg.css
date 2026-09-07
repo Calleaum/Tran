@@ -1,0 +1,73 @@
+/* ==========================================================================
+   FOND ANIMÉ — cartes qui défilent derrière l'interface
+   Extrait de l'ancien App.css (voir Home.tsx / App.tsx pour l'import).
+   ========================================================================== */
+
+/* ==========================================================================
+   FOND ANIMÉ — cartes qui défilent en diagonale derrière l'interface
+   ========================================================================== */
+
+.floating-cards-bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.floating-cards-bg__item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation-name: floating-card-drift;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  opacity: 0.16;
+  will-change: transform;
+}
+
+@keyframes floating-card-drift {
+  0% {
+    transform: translate(var(--start-x), var(--start-y)) rotate(var(--rotate-start)) scale(var(--scale));
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotate(var(--rotate-end)) scale(var(--scale));
+  }
+}
+
+.floating-card {
+  width: 76px;
+  height: 106px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #fffdf6, #f2ead4);
+  border: var(--toon-line) solid var(--toon-line-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  position: relative;
+}
+.floating-card--red { color: var(--red-suit); }
+.floating-card--black { color: var(--black-suit); }
+.floating-card__corner {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.floating-card__corner--tl { top: 6px; left: 6px; }
+.floating-card__corner--br { bottom: 6px; right: 6px; transform: rotate(180deg); }
+.floating-card__pip { font-size: 1.8rem; }
+
+/* Toutes les surfaces d'écran doivent passer au-dessus du fond animé */
+.menu-screen,
+.submenu-screen,
+.table-screen,
+.app-loading {
+  position: relative;
+  z-index: 1;
+}
+

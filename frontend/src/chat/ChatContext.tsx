@@ -30,7 +30,7 @@ interface ChatContextValue {
 
   // --- Blocage (`POST /friends/:id/{block,unblock}`) ---
   blockedIds: Set<string>;
-  blockedPlayers: { id: string; name: string }[];
+  blockedPlayers: { id: string; name: string; avatar?: string | null }[];
   blockPlayer: (peerId: string, peerName: string) => Promise<void>;
   unblockPlayer: (peerId: string) => Promise<void>;
   isBlocked: (peerId: string) => boolean;
@@ -66,6 +66,9 @@ export function ChatProvider({
   const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set());
   const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
   const [blockedNames, setBlockedNames] = useState<Record<string, string>>({});
+  const [blockedAvatars, setBlockedAvatars] = useState<Record<string, string | null | undefined>>(
+    {},
+  );
   const [globalMessages, setGlobalMessages] = useState<ChatMessage[]>([]);
   const [isSpectating, setIsSpectating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -156,9 +159,14 @@ export function ChatProvider({
   // ─── Blocages ──────────────────────────────────────────────────────────
   const refreshBlocked = useCallback(async () => {
     try {
-      const blocked = (await friendsService.blocked()) as { id: string; username: string }[];
+      const blocked = (await friendsService.blocked()) as {
+        id: string;
+        username: string;
+        avatar?: string | null;
+      }[];
       setBlockedIds(new Set(blocked.map((b) => b.id)));
       setBlockedNames(Object.fromEntries(blocked.map((b) => [b.id, b.username])));
+      setBlockedAvatars(Object.fromEntries(blocked.map((b) => [b.id, b.avatar])));
     } catch {
       // Le blocage reste consultable depuis l'écran Social ; on n'écrase pas
       // l'état local si la requête échoue (par ex. réseau coupé).
@@ -276,8 +284,13 @@ export function ChatProvider({
   const isOnline = useCallback((userId: string) => onlineIds.has(userId), [onlineIds]);
 
   const blockedPlayers = useMemo(
-    () => Array.from(blockedIds).map((id) => ({ id, name: blockedNames[id] ?? id })),
-    [blockedIds, blockedNames],
+    () =>
+      Array.from(blockedIds).map((id) => ({
+        id,
+        name: blockedNames[id] ?? id,
+        avatar: blockedAvatars[id],
+      })),
+    [blockedIds, blockedNames, blockedAvatars],
   );
 
   const value: ChatContextValue = {

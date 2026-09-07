@@ -107,6 +107,12 @@ export class PresidentGame {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
+  // Nom affiché du salon, choisi par le créateur. Optionnel : les parties
+  // créées avant l'ajout de ce champ (ou sans nom saisi) restent à null,
+  // le front retombe alors sur "Salon <id>".
+  @Column({ type: 'varchar', length: 40, nullable: true })
+  name!: string | null;
+
   @Column({ default: 3 })
   minPlayers!: number;
 

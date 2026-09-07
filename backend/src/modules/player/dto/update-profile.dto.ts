@@ -1,4 +1,4 @@
-import { IsString, IsOptional, MinLength, MaxLength, IsUrl } from 'class-validator';
+import { IsString, IsOptional, MinLength, MaxLength } from 'class-validator';
 
 export class UpdateProfileDto {
   @IsString()
@@ -7,7 +7,10 @@ export class UpdateProfileDto {
   @IsOptional()
   username?: string;
 
-  @IsUrl()
+  // Peut être une URL absolue (photo 42) ou un chemin relatif servi par le
+  // backend (/uploads/avatars/xxx.jpg) après upload : pas de @IsUrl() ici.
+  @IsString()
+  @MaxLength(500)
   @IsOptional()
   avatar?: string;
 }

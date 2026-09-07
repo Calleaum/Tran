@@ -42,7 +42,12 @@ interface GameTableProps {
   gameId: string;
   /** Nom affiché du salon (id court de la partie). */
   roomLabel: string;
-  onLeave: () => void;
+  /**
+   * `reason` est renseigné quand on quitte suite à un échec (ex : partie
+   * introuvable) plutôt qu'un clic volontaire sur "Quitter" — le parent
+   * peut alors le réafficher sur l'écran de liste des parties.
+   */
+  onLeave: (reason?: string) => void;
   /** true si on regarde la partie sans y participer. */
   isSpectator?: boolean;
 }
@@ -50,7 +55,14 @@ interface GameTableProps {
 interface SocketAck {
   success?: boolean;
   error?: string;
-  game?: { id: string; playerIds: string[]; creatorId: string; status: string; state: PublicState | null };
+  game?: {
+    id: string;
+    name?: string | null;
+    playerIds: string[];
+    creatorId: string;
+    status: string;
+    state: PublicState | null;
+  };
 }
 
 export function GameTable({ gameId, roomLabel, onLeave, isSpectator = false }: GameTableProps) {
@@ -63,8 +75,19 @@ export function GameTable({ gameId, roomLabel, onLeave, isSpectator = false }: G
   const [chatFocusPeerId, setChatFocusPeerId] = useState<string | null>(null);
   const [activeOpponent, setActiveOpponent] = useState<string | null>(null);
   const [gameMessages, setGameMessages] = useState<ChatMessage[]>([]);
+  const [roomName, setRoomName] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
   const { me, openDm, dmThreads, isBlocked, setIsSpectating } = useChat();
+
+  // Refs "miroir" pour pouvoir lire la valeur à jour dans le cleanup de
+  // l'effet de démontage ci-dessous, sans ajouter ces valeurs à ses
+  // dépendances (on ne veut PAS que cet effet se redéclenche à chaque
+  // changement de gameId/isSpectator — seulement au vrai démontage).
+  const gameIdRef = useRef(gameId);
+  const isSpectatorRef = useRef(isSpectator);
+  const hasLeftRef = useRef(false);
+  gameIdRef.current = gameId;
+  isSpectatorRef.current = isSpectator;
 
   useEffect(() => {
     setIsSpectating(isSpectator);
@@ -72,7 +95,13 @@ export function GameTable({ gameId, roomLabel, onLeave, isSpectator = false }: G
   }, [isSpectator, setIsSpectating]);
 
   // Noms des joueurs : le serveur ne transmet que des ids dans l'état de jeu.
-  useEffect(() => {
+  // `names` est tenu à jour via `namesRef` pour pouvoir vérifier, dans les
+  // handlers socket, si un id vient d'apparaître sans provoquer de nouvel
+  // effet à chaque changement de `names`.
+  const namesRef = useRef<Record<string, string>>({});
+  namesRef.current = names;
+
+  const refreshNames = useCallback(() => {
     let cancelled = false;
     playerService
       .getAll()
@@ -84,6 +113,19 @@ export function GameTable({ gameId, roomLabel, onLeave, isSpectator = false }: G
       .catch(() => undefined);
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => refreshNames(), [refreshNames]);
+
+  // Filet de sécurité : si un id de joueur (dans la partie ou la salle
+  // d'attente) n'a pas encore de pseudo connu — typiquement un compte créé
+  // après le chargement initial de `names` — on rafraîchit la liste.
+  useEffect(() => {
+    const allIds = new Set([...(state?.playerIds ?? []), ...playerIds]);
+    const hasUnknown = Array.from(allIds).some(
+      (id) => id !== me.id && !(id in namesRef.current),
+    );
+    if (hasUnknown) refreshNames();
+  }, [state?.playerIds, playerIds, me.id, refreshNames]);
 
   const nameOf = useCallback(
     (userId: string) => (userId === me.id ? me.name : names[userId] ?? userId.slice(0, 8)),
@@ -97,11 +139,19 @@ export function GameTable({ gameId, roomLabel, onLeave, isSpectator = false }: G
 
     socket.emit('president:join_room', { gameId }, (ack: SocketAck) => {
       if (!ack?.success) {
-        setMessage(ack?.error ?? 'Impossible de rejoindre cette partie.');
+        // On n'a jamais vraiment rejoint cette partie (elle est peut-être
+        // introuvable, supprimée, ou héritée d'une session précédente,
+        // voir ACTIVE_ROOM_KEY dans pages/Games.tsx) : pas la peine
+        // d'émettre `president:leave` au démontage, et surtout on ne
+        // laisse pas l'utilisateur coincé ici sans aucun bouton — on
+        // repart vers la liste des parties avec le message d'erreur.
+        hasLeftRef.current = true;
+        onLeave(ack?.error ?? 'Impossible de rejoindre cette partie.');
         return;
       }
       setPlayerIds(ack.game?.playerIds ?? []);
       setState(ack.game?.state ?? null);
+      setRoomName(ack.game?.name ?? null);
       setMessage(
         ack.game?.state
           ? 'Partie en cours.'
@@ -124,6 +174,9 @@ export function GameTable({ gameId, roomLabel, onLeave, isSpectator = false }: G
     };
     const onPlayerJoined = (data: { playerIds: string[] }) => {
       setPlayerIds(data.playerIds);
+      // Le nouveau joueur peut avoir un compte créé après le premier
+      // chargement de `names` : on rafraîchit pour récupérer son pseudo.
+      refreshNames();
     };
     const onPlayerLeft = (data: { gameId: string; playerIds: string[] }) => {
       if (data.gameId !== gameId) return;
@@ -174,7 +227,7 @@ export function GameTable({ gameId, roomLabel, onLeave, isSpectator = false }: G
       socket.off('president:chat:message', onGameMessage);
       socket.off('president:game_finished', onFinished);
     };
-  }, [gameId, isSpectator, me.id, nameOf]);
+  }, [gameId, isSpectator, me.id, nameOf, refreshNames]);
 
   // ─── Données dérivées de l'état serveur ────────────────────────────────
 
@@ -253,10 +306,49 @@ export function GameTable({ gameId, roomLabel, onLeave, isSpectator = false }: G
 
   function leaveGame() {
     socketRef.current?.emit('president:leave', { gameId }, (ack: SocketAck) => {
-      if (ack?.success) onLeave();
-      else setMessage(ack?.error ?? 'Impossible de quitter la partie.');
+      if (ack?.success) {
+        hasLeftRef.current = true;
+        onLeave();
+      } else {
+        setMessage(ack?.error ?? 'Impossible de quitter la partie.');
+      }
     });
   }
+
+  // ─── Quitter la partie si on navigue ailleurs sans cliquer "Quitter" ────
+  // Le socket de jeu est un singleton partagé par toute l'app (voir
+  // services/socket.ts) : naviguer vers un autre écran (Accueil, Social...)
+  // démonte GameTable SANS déconnecter le socket. Sans ce cleanup, le
+  // backend ne serait jamais informé du départ : le joueur resterait dans
+  // `state.playerIds`, garderait sa main, et bloquerait la partie si c'est
+  // son tour. On ne le fait pas pour les spectateurs (jamais assis à la
+  // table) ni si `leaveGame()` a déjà été appelé explicitement (idempotent
+  // côté backend de toute façon, mais on évite l'appel réseau superflu).
+  //
+  // ⚠️ En dev, <React.StrictMode> (main.tsx) monte/démonte/remonte chaque
+  // composant pour détecter les effets impurs. Ce cleanup s'exécute donc
+  // une fois "pour de faux" juste après le montage, ce qui nous ferait
+  // quitter la partie qu'on vient à peine de rejoindre. On retarde l'appel
+  // réseau d'un tick et on l'annule si le composant se "remonte"
+  // immédiatement (le remount StrictMode arrive dans le même flush,
+  // avant que le setTimeout ne se déclenche) — un vrai démontage, lui,
+  // ne sera jamais suivi d'un remount, donc l'appel part bien.
+  const pendingLeaveTimeout = useRef<number | null>(null);
+  useEffect(() => {
+    if (pendingLeaveTimeout.current !== null) {
+      window.clearTimeout(pendingLeaveTimeout.current);
+      pendingLeaveTimeout.current = null;
+    }
+    return () => {
+      if (isSpectatorRef.current || hasLeftRef.current) return;
+      const socket = socketRef.current;
+      const gameId = gameIdRef.current;
+      pendingLeaveTimeout.current = window.setTimeout(() => {
+        socket?.emit('president:leave', { gameId });
+        pendingLeaveTimeout.current = null;
+      }, 0);
+    };
+  }, []);
 
   function sendGameMessage(text: string) {
     const content = text.trim();
@@ -286,7 +378,7 @@ export function GameTable({ gameId, roomLabel, onLeave, isSpectator = false }: G
           ☰ Menu
         </button>
         <div className="table-room-name">
-          Salon : <strong>{roomLabel}</strong>
+          Salon : <strong>{roomName || roomLabel}</strong>
           {isSpectator && <span className="spectator-tag">👁 Spectateur</span>}
         </div>
         <div className="table-status">{message}</div>
@@ -298,7 +390,7 @@ export function GameTable({ gameId, roomLabel, onLeave, isSpectator = false }: G
           focusPeerId={chatFocusPeerId}
           disabledReason={isSpectator ? 'Les spectateurs ne peuvent pas parler dans le chat.' : null}
           gameRoom={{
-            label: `Salon de la partie ${roomLabel}`,
+            label: `Salon de la partie ${roomName || roomLabel}`,
             messages: gameMessages,
             onSend: sendGameMessage,
           }}

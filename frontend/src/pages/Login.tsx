@@ -6,9 +6,11 @@ import '../styles/Auth.css';
 interface LoginProps {
   onSuccess: (user: any) => void;
   onRegisterClick: () => void;
+  onPrivacyClick: () => void;
+  onTermsClick: () => void;
 }
 
-export function Login({ onSuccess, onRegisterClick }: LoginProps) {
+export function Login({ onSuccess, onRegisterClick, onPrivacyClick, onTermsClick }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -76,6 +78,19 @@ export function Login({ onSuccess, onRegisterClick }: LoginProps) {
           </button>
         </form>
 
+        <div className="auth-divider">
+          <span>ou</span>
+        </div>
+
+        <button
+          type="button"
+          className="auth-submit auth-submit--42"
+          onMouseEnter={playHover}
+          onClick={() => { playClick(); authService.redirectToFortyTwoLogin(); }}
+        >
+          Se connecter avec 42
+        </button>
+
         <p className="auth-switch">
           Pas encore de compte ?{' '}
           <button
@@ -85,6 +100,26 @@ export function Login({ onSuccess, onRegisterClick }: LoginProps) {
             onClick={() => { playClick(); onRegisterClick(); }}
           >
             Créer un compte
+          </button>
+        </p>
+
+        <p className="auth-switch">
+          <button
+            type="button"
+            className="auth-switch__link"
+            onMouseEnter={playHover}
+            onClick={() => { playClick(); onPrivacyClick(); }}
+          >
+            Politique de confidentialité
+          </button>
+          {' · '}
+          <button
+            type="button"
+            className="auth-switch__link"
+            onMouseEnter={playHover}
+            onClick={() => { playClick(); onTermsClick(); }}
+          >
+            Conditions d'utilisation
           </button>
         </p>
       </div>

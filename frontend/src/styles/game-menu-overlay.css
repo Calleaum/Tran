@@ -1,0 +1,72 @@
+/* ==========================================================================
+   MENU DE PARTIE — overlay pause en jeu
+   Extrait de l'ancien App.css (voir Home.tsx / App.tsx pour l'import).
+   ========================================================================== */
+
+/* ==========================================================================
+   MENU DE PARTIE — overlay pause (accessible via ☰ Menu en haut à gauche)
+   ========================================================================== */
+
+.game-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-menu-overlay__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 46, 33, 0.75);
+  backdrop-filter: blur(3px);
+}
+
+.game-menu-overlay__panel {
+  position: relative;
+  z-index: 1;
+  width: min(92vw, 420px);
+  max-height: 85vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2rem;
+  border-radius: 20px;
+  border: var(--toon-line) solid var(--toon-line-color);
+  background: linear-gradient(180deg, var(--felt-700), var(--felt-900));
+  box-shadow: var(--toon-shadow);
+  color: var(--cream-100);
+}
+
+.game-menu-overlay__title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+}
+
+.game-menu-overlay__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.game-menu-overlay__leave {
+  border-color: rgba(168, 40, 59, 0.55);
+  color: #f0c9c9;
+}
+.game-menu-overlay__leave:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: rgba(168, 40, 59, 0.18);
+}
+
+/* Le panneau Options réutilisé dans l'overlay ne doit pas garder ses
+   dimensions "page entière" : on l'adapte pour qu'il tienne dans la boîte
+   modale du menu de partie. */
+.game-menu-overlay__panel .submenu-screen {
+  min-height: auto;
+  padding: 0;
+  max-width: none;
+  margin: 0;
+}

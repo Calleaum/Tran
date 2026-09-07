@@ -1,0 +1,76 @@
+/* ==========================================================================
+   BOUTONS PARTAGÉS — primary-btn / ghost-btn (utilisés partout)
+   Extrait de l'ancien App.css (voir Home.tsx / App.tsx pour l'import).
+   ========================================================================== */
+
+/* ---- Boutons partagés ---- */
+.primary-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  border: var(--toon-line) solid var(--toon-line-color);
+  background: linear-gradient(160deg, var(--brass-300), var(--brass-600));
+  color: var(--ink-900);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: var(--toon-shadow-sm);
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.12s ease, filter 0.12s ease;
+}
+.primary-btn:hover:not(:disabled) {
+  transform: translate(-2px, -3px) scale(1.03);
+  box-shadow: 6px 7px 0 rgba(0, 0, 0, 0.38);
+  filter: brightness(1.06);
+}
+.primary-btn:active:not(:disabled) {
+  transform: translate(0, 0) scale(0.97);
+  box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.35);
+}
+.primary-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.ghost-btn {
+  padding: 0.6rem 1.1rem;
+  border-radius: 12px;
+  border: var(--toon-line) solid rgba(217, 180, 92, 0.55);
+  background: rgba(0,0,0,0.12);
+  color: var(--cream-100);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--toon-shadow-sm);
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+}
+.ghost-btn:hover:not(:disabled) {
+  transform: translate(-2px, -3px) scale(1.03);
+  border-color: var(--brass-400);
+  background: rgba(217, 180, 92, 0.12);
+  box-shadow: 6px 7px 0 rgba(0, 0, 0, 0.32);
+}
+.ghost-btn:active:not(:disabled) {
+  transform: translate(0, 0) scale(0.97);
+  box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.3);
+}
+.ghost-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.ghost-btn--danger {
+  border-color: rgba(168, 40, 59, 0.55);
+  color: #f0c9c9;
+}
+.ghost-btn--danger:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: rgba(168, 40, 59, 0.18);
+}
+
+.ghost-btn--small,
+.primary-btn--small {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}

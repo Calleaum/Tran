@@ -17,6 +17,7 @@ import { RateLimiterService } from './rate-limit/rate-limiter.service';
 import { SendMessageDto } from './dto/send-message.dto';
 import { SendGlobalMessageDto } from './dto/send-global-message.dto';
 import { extractUserIdFromSocket } from './ws/ws-auth.util';
+import { resolveCorsOrigin } from '../../common/cors.util';
 
 // One room per user (`user:<id>`) is the whole trick here: every socket a
 // user opens (multiple tabs/devices) joins that room, so broadcasting to
@@ -25,7 +26,7 @@ import { extractUserIdFromSocket } from './ws/ws-auth.util';
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: resolveCorsOrigin(),
     credentials: true,
   },
 })

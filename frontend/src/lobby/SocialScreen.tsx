@@ -3,9 +3,10 @@ import { playHover, playClick, playAcceptFriend } from '../sound';
 import { SocialPlayer, STATUS_LABEL } from '../social/socialData';
 import { useSocial } from '../social/useSocial';
 import { useChat } from '../chat/ChatContext';
+import { PlayerAvatar } from '../components/PlayerAvatar';
 
 interface SocialScreenProps {
-  user: { id: string; username: string; email: string };
+  user: { id: string; username: string; email: string; avatar?: string | null };
   onBack: () => void;
 }
 
@@ -48,7 +49,7 @@ export function SocialScreen({ user, onBack }: SocialScreenProps) {
       <h2 className="submenu-title">Social</h2>
 
       <div className="profile-card">
-        <div className="profile-card__avatar">{user.username.charAt(0).toUpperCase()}</div>
+        <PlayerAvatar name={user.username} avatar={user.avatar} className="profile-card__avatar" />
         <div className="profile-card__info">
           <span className="profile-card__name">{user.username}</span>
           <span className="profile-card__email">{user.email}</span>
@@ -67,9 +68,11 @@ export function SocialScreen({ user, onBack }: SocialScreenProps) {
           <ul className="social-list">
             {friends.map((friend) => (
               <li key={friend.id} className="social-row">
-                <div className={`social-row__avatar social-row__avatar--${friend.status}`}>
-                  {friend.name.charAt(0)}
-                </div>
+                <PlayerAvatar
+                  name={friend.name}
+                  avatar={friend.avatar}
+                  className={`social-row__avatar social-row__avatar--${friend.status}`}
+                />
                 <div className="social-row__info">
                   <span className="social-row__name">{friend.name}</span>
                   <span className="social-row__status">{STATUS_LABEL[friend.status]}</span>
@@ -110,7 +113,11 @@ export function SocialScreen({ user, onBack }: SocialScreenProps) {
             <ul className="social-list">
               {social.incoming.map(({ requestId, player }) => (
                 <li key={requestId} className="social-row">
-                  <div className="social-row__avatar social-row__avatar--offline">{player.name.charAt(0)}</div>
+                  <PlayerAvatar
+                    name={player.name}
+                    avatar={player.avatar}
+                    className="social-row__avatar social-row__avatar--offline"
+                  />
                   <div className="social-row__info">
                     <span className="social-row__name">{player.name}</span>
                     <span className="social-row__status">Souhaite t'ajouter</span>
@@ -143,7 +150,11 @@ export function SocialScreen({ user, onBack }: SocialScreenProps) {
             <ul className="social-list">
               {social.suggestions.map((player) => (
                 <li key={player.id} className="social-row">
-                  <div className="social-row__avatar social-row__avatar--offline">{player.name.charAt(0)}</div>
+                  <PlayerAvatar
+                    name={player.name}
+                    avatar={player.avatar}
+                    className="social-row__avatar social-row__avatar--offline"
+                  />
                   <div className="social-row__info">
                     <span className="social-row__name">{player.name}</span>
                     <span className="social-row__status">Joueur inscrit</span>
@@ -177,7 +188,11 @@ export function SocialScreen({ user, onBack }: SocialScreenProps) {
           <ul className="social-list">
             {social.outgoing.map(({ requestId, player }) => (
               <li key={requestId} className="social-row">
-                <div className="social-row__avatar social-row__avatar--offline">{player.name.charAt(0)}</div>
+                <PlayerAvatar
+                  name={player.name}
+                  avatar={player.avatar}
+                  className="social-row__avatar social-row__avatar--offline"
+                />
                 <div className="social-row__info">
                   <span className="social-row__name">{player.name}</span>
                   <span className="social-row__status">En attente de sa réponse</span>
@@ -196,9 +211,11 @@ export function SocialScreen({ user, onBack }: SocialScreenProps) {
           <ul className="social-list">
             {blockedPlayers.map((player) => (
               <li key={player.id} className="social-row social-row--blocked">
-                <div className="social-row__avatar social-row__avatar--offline">
-                  {player.name.charAt(0)}
-                </div>
+                <PlayerAvatar
+                  name={player.name}
+                  avatar={player.avatar}
+                  className="social-row__avatar social-row__avatar--offline"
+                />
                 <div className="social-row__info">
                   <span className="social-row__name">{player.name}</span>
                   <span className="social-row__status">Bloqué — ne peut plus te parler</span>

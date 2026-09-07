@@ -19,11 +19,41 @@ export class PlayerService {
   }
 
   async getLeaderboard(): Promise<Partial<User>[]> {
-    return this.userRepository.find({
-      select: ['id', 'username', 'avatar', 'wins', 'losses', 'xp', 'level'],
-      order: { wins: 'DESC' },
-      take: 20,
+    const users = await this.userRepository.find({
+      select: [
+        'id',
+        'username',
+        'avatar',
+        'wins',
+        'losses',
+        'xp',
+        'level',
+        'presidentCount',
+        'neutralCount',
+        'trouducCount',
+      ],
     });
+
+    // Trier uniquement par `wins DESC` ne suffit pas : à 0 victoire, un
+    // joueur qui a fini "Neutre" (0 victoire / 0 défaite) et un joueur qui
+    // n'a JAMAIS joué (0/0 aussi) sont indiscernables, et sans critère de
+    // repli TypeORM les ordonne arbitrairement — c'est ce qui pouvait
+    // classer un joueur inactif devant des joueurs ayant réellement joué.
+    // Un joueur n'a "joué" que s'il a au moins une victoire, une défaite ou
+    // un titre neutre à son actif ; ceux qui n'ont rien de tout ça sont
+    // toujours relégués en fin de classement, groupés ensemble à 0/0/0.
+    const hasPlayed = (u: User) => u.wins + u.losses + u.neutralCount > 0;
+
+    return users
+      .sort((a, b) => {
+        if (b.wins !== a.wins) return b.wins - a.wins; // + de victoires d'abord
+        const aPlayed = hasPlayed(a);
+        const bPlayed = hasPlayed(b);
+        if (aPlayed !== bPlayed) return aPlayed ? -1 : 1; // joueur actif avant joueur jamais entré en partie
+        if (a.losses !== b.losses) return a.losses - b.losses; // moins de défaites d'abord
+        return a.username.localeCompare(b.username); // ordre stable en dernier recours
+      })
+      .slice(0, 20);
   }
 
   async findOne(id: string): Promise<Partial<User>> {

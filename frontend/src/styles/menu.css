@@ -1,0 +1,154 @@
+/* ==========================================================================
+   MENU PRINCIPAL — page d'accueil (ancienne version tuiles)
+   Extrait de l'ancien App.css (voir Home.tsx / App.tsx pour l'import).
+   ========================================================================== */
+
+/* ==========================================================================
+   MENU PRINCIPAL
+   ========================================================================== */
+
+.menu-screen {
+  min-height: 100vh;
+  width: 100%;
+  background: radial-gradient(ellipse at 50% -10%, rgba(217, 180, 92, 0.12), transparent 55%);
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2.5rem;
+  border-bottom: 1px solid rgba(217, 180, 92, 0.25);
+}
+
+.menu-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.menu-brand__suit {
+  color: var(--brass-400);
+  font-size: 1.1rem;
+  letter-spacing: 0.15em;
+}
+.menu-brand__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.5rem;
+  letter-spacing: 0.01em;
+}
+
+.menu-account {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.92rem;
+  color: var(--cream-200);
+}
+
+.menu-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem 2.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.options-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.65rem 1.5rem;
+  background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(0,0,0,0.18));
+  border: var(--toon-line) solid var(--toon-line-color);
+  border-radius: 14px;
+  color: var(--cream-100);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  box-shadow: var(--toon-shadow-sm);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.options-btn:hover {
+  transform: translate(-2px, -3px) scale(1.01);
+  box-shadow: 6px 7px 0 rgba(0, 0, 0, 0.38);
+  border-color: var(--brass-400);
+}
+.options-btn:active {
+  transform: translate(0, 0) scale(0.98);
+  box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.35);
+}
+.options-btn__gear {
+  color: var(--brass-400);
+  font-size: 1.2rem;
+  transition: transform 0.4s ease;
+}
+.options-btn:hover .options-btn__gear {
+  transform: rotate(90deg);
+}
+
+.menu-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 2.5rem 1.25rem;
+  background: linear-gradient(160deg, rgba(255,255,255,0.08), rgba(0,0,0,0.15));
+  border: var(--toon-line) solid var(--toon-line-color);
+  border-radius: 20px;
+  cursor: pointer;
+  color: var(--cream-100);
+  box-shadow: var(--toon-shadow);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s ease, background 0.18s ease;
+}
+.menu-tile:hover {
+  transform: translate(-3px, -5px) scale(1.03) rotate(-1deg);
+  box-shadow: 8px 10px 0 rgba(0, 0, 0, 0.4);
+  background: linear-gradient(160deg, rgba(217,180,92,0.2), rgba(0,0,0,0.15));
+  border-color: var(--brass-400);
+}
+.menu-tile:active {
+  transform: translate(0, 0) scale(0.98);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+}
+.menu-tile__icon {
+  font-size: 2.4rem;
+  color: var(--brass-400);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.menu-tile:hover .menu-tile__icon {
+  transform: scale(1.25) rotate(8deg);
+}
+.menu-tile__label {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+.menu-tile__desc {
+  font-size: 0.82rem;
+  color: var(--cream-200);
+  text-align: center;
+  opacity: 0.8;
+}
+
+@media (max-width: 780px) {
+  .menu-grid { grid-template-columns: repeat(2, 1fr); }
+}
+

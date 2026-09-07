@@ -6,11 +6,14 @@ import { getGameSocket } from '../services/socket';
 interface PlayMenuProps {
   onBack: () => void;
   onEnterRoom: (gameId: string, options?: { spectate?: boolean }) => void;
+  /** Erreur à afficher au premier rendu (ex : on revient d'un salon dont la partie a disparu). */
+  initialError?: string | null;
 }
 
 // Renvoyé par `GET /president`.
 interface PresidentGame {
   id: string;
+  name: string | null;
   creatorId: string;
   playerIds: string[];
   minPlayers: number;
@@ -26,10 +29,11 @@ const STATUS_LABEL: Record<PresidentGame['status'], string> = {
   cancelled: 'Annulée',
 };
 
-export function PlayMenu({ onBack, onEnterRoom }: PlayMenuProps) {
+export function PlayMenu({ onBack, onEnterRoom, initialError = null }: PlayMenuProps) {
   const [games, setGames] = useState<PresidentGame[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
   const [busy, setBusy] = useState(false);
+  const [newGameName, setNewGameName] = useState('');
 
   const reload = useCallback(async () => {
     try {
@@ -49,7 +53,8 @@ export function PlayMenu({ onBack, onEnterRoom }: PlayMenuProps) {
     playClick();
     setBusy(true);
     try {
-      const game = (await presidentService.create()) as PresidentGame;
+      const game = (await presidentService.create(newGameName.trim() || undefined)) as PresidentGame;
+      setNewGameName('');
       onEnterRoom(game.id);
     } catch {
       setError('Impossible de créer une partie.');
@@ -82,6 +87,19 @@ export function PlayMenu({ onBack, onEnterRoom }: PlayMenuProps) {
     <div className="submenu-screen">
       <button className="ghost-btn submenu-back" onMouseEnter={playHover} onClick={onBack}>← Retour au menu</button>
       <h2 className="submenu-title">Jouer</h2>
+
+      <div className="form-field">
+        <label htmlFor="new-game-name">Nom de la partie (optionnel)</label>
+        <input
+          id="new-game-name"
+          type="text"
+          maxLength={40}
+          placeholder="Ex : Kiki la menace"
+          value={newGameName}
+          onChange={(e) => setNewGameName(e.target.value)}
+          disabled={busy}
+        />
+      </div>
 
       <div className="choice-grid">
         <button
@@ -120,7 +138,7 @@ export function PlayMenu({ onBack, onEnterRoom }: PlayMenuProps) {
           {openGames.map((game) => (
             <li key={game.id} className="social-row">
               <div className="social-row__info">
-                <span className="social-row__name">Salon {game.id.slice(0, 8)}</span>
+                <span className="social-row__name">{game.name || `Salon ${game.id.slice(0, 8)}`}</span>
                 <span className="social-row__status">
                   {STATUS_LABEL[game.status]} — {game.playerIds.length}/{game.maxPlayers} joueurs
                 </span>

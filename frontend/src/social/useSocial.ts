@@ -51,7 +51,7 @@ export function useSocial(myId: string) {
         friendsService.list() as Promise<ApiFriend[]>,
         friendsService.incomingRequests() as Promise<ApiFriendRequest[]>,
         friendsService.outgoingRequests() as Promise<ApiFriendRequest[]>,
-        friendsService.blocked() as Promise<{ id: string; username: string }[]>,
+        friendsService.blocked() as Promise<{ id: string; username: string; avatar?: string | null }[]>,
         playerService.getAll() as Promise<ApiPlayer[]>,
       ]);
 

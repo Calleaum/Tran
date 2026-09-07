@@ -1,17 +1,34 @@
 // Client HTTP partagé vers le backend NestJS.
 // Toutes les requêtes passent par cette instance axios : elle porte l'URL de
-// base (VITE_API_URL) et injecte automatiquement le JWT stocké en localStorage.
+// base (VITE_API_URL) et injecte automatiquement le JWT stocké en sessionStorage.
+// sessionStorage (contrairement à localStorage) est isolé par onglet : ça
+// permet de se connecter avec 2 comptes différents dans 2 onglets du même
+// navigateur, chacun gardant sa propre session.
 
 import axios from 'axios';
 
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Si VITE_API_URL n'est pas fourni (cas par défaut), on déduit l'URL de
+// l'API à partir de l'origine utilisée par le navigateur pour charger la
+// page. Comme nginx expose le frontend ET l'API sur le même host:port,
+// ça fonctionne aussi bien depuis https://localhost:3000 que depuis
+// https://<IP_LAN>:3000 — sans avoir à figer une IP en dur au build.
+export const API_URL = import.meta.env.VITE_API_URL || `${window.location.origin}/api`;
 
 export const TOKEN_KEY = 'token';
+
+// Salon de partie actif (voir pages/Games.tsx). Doit être nettoyé partout où
+// TOKEN_KEY l'est (déconnexion, changement de compte) : sinon un gameId
+// d'un compte/session précédent reste en sessionStorage et est restauré
+// tel quel après une reconnexion (typiquement via l'OAuth 42, qui reste
+// dans le même onglet le temps de la redirection) → l'appli tente de
+// rejoindre une partie qui n'existe plus ("Partie introuvable") sans
+// pouvoir s'en sortir.
+export const ACTIVE_ROOM_KEY = 'transcendence:active_room';
 
 export const api = axios.create({ baseURL: API_URL });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = sessionStorage.getItem(TOKEN_KEY);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -27,6 +44,17 @@ export interface AuthResponse {
     email: string;
     username: string;
   };
+}
+
+/**
+ * L'avatar stocké côté back est soit une URL absolue (photo 42), soit un
+ * chemin relatif renvoyé par l'upload (/uploads/avatars/xxx.jpg). Cette
+ * fonction renvoie dans tous les cas une URL affichable telle quelle.
+ */
+export function resolveAvatarUrl(avatar?: string | null): string | undefined {
+  if (!avatar) return undefined;
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar;
+  return `${API_URL}${avatar}`;
 }
 
 export const authApi = {
@@ -53,6 +81,15 @@ export const playerService = {
   getStats: async (id: string) => (await api.get(`/players/${id}/stats`)).data,
   updateProfile: async (id: string, payload: { username?: string; avatar?: string }) =>
     (await api.patch(`/players/${id}`, payload)).data,
+  uploadAvatar: async (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return (
+      await api.post(`/players/${id}/avatar`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+    ).data;
+  },
 };
 
 /* ─── XP / niveaux ──────────────────────────────────────────────────────── */
@@ -112,7 +149,7 @@ export const presidentService = {
   getMine: async () => (await api.get('/president/me')).data,
   getOne: async (id: string) => (await api.get(`/president/${id}`)).data,
   getState: async (id: string) => (await api.get(`/president/${id}/state`)).data,
-  create: async () => (await api.post('/president')).data,
+  create: async (name?: string) => (await api.post('/president', name ? { name } : {})).data,
   join: async (id: string) => (await api.post(`/president/${id}/join`)).data,
   start: async (id: string) => (await api.patch(`/president/${id}/start`)).data,
   finish: async (id: string) => (await api.patch(`/president/${id}/finish`)).data,
